@@ -2,7 +2,6 @@ import multer, { memoryStorage } from "multer";
 import express from "express";
 import storage from "@google-cloud/storage";
 import path from "path";
-
 // Instantiate a storage client
 const googleCloudStorage = storage({
   projectId: process.env.PROJECT_ID,
@@ -91,9 +90,21 @@ app.post("/uploads/private", m.single("file"), (req, res, next) => {
   });
 
   blobStream.on("finish", () => {
-    // The public URL can be used to directly access the file via HTTP.
-    const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
-    res.status(200).send(`Success!\n Image uploaded to ${publicUrl}`);
+    const config = {
+      action: 'read',
+      //todo-make this 30 minutes
+      expires: '03-17-2025'
+    };
+
+    bucket.file(`${blob.name}`).getSignedUrl(config, function (err, url) {
+      if (err) {
+        console.error(err);
+        return;
+      }
+
+      // The file is now available to read from this URL.
+      res.status(200).send(`Success!\n Image accessible from ${url}`);
+    })
   });
 
   blobStream.end(req.file.buffer);
