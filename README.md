@@ -8,3 +8,5 @@ Boilerplate Node.js app for handling user uploads to Google Cloud Storage
 ```bash 
 source local.env && npm run start
 ```
+
+rename local.env to .env and replace values
